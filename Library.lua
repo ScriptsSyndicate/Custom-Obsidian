@@ -5981,21 +5981,26 @@ if WindowInfo.Icon then
     -- Get icon using Library:GetCustomIcon (supports Lucide + custom images)
     local IconData = Library:GetCustomIcon(WindowInfo.Icon)
     
-    if IconData then
+    if IconData and IconData.Url then
         WindowIcon = New("ImageLabel", {
             Image = IconData.Url,
             ImageColor3 = IconData.Custom and "White" or "AccentColor",
-            ImageRectOffset = IconData.ImageRectOffset,
-            ImageRectSize = IconData.ImageRectSize,
+            ImageRectOffset = IconData.ImageRectOffset or Vector2.zero,
+            ImageRectSize = IconData.ImageRectSize or Vector2.zero,
             Size = WindowInfo.IconSize,
             BackgroundTransparency = 1,
             Parent = TitleHolder,
         })
     else
-        -- Fallback if icon not found
-        WindowIcon = New("TextButton", {
-            Text = WindowInfo.Title:sub(1, 1),
-            TextScaled = true,
+        -- Fallback: try direct rbxassetid if it's a number
+        local ImageUrl = WindowInfo.Icon
+        if tonumber(WindowInfo.Icon) then
+            ImageUrl = string.format("rbxassetid://%d", WindowInfo.Icon)
+        end
+        
+        WindowIcon = New("ImageLabel", {
+            Image = ImageUrl,
+            ImageColor3 = "AccentColor",
             Size = WindowInfo.IconSize,
             BackgroundTransparency = 1,
             Parent = TitleHolder,
