@@ -5962,42 +5962,57 @@ function Library:CreateWindow(WindowInfo)
         Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
-        local TitleHolder = New("Frame", {
+local TitleHolder = New("Frame", {
+    BackgroundTransparency = 1,
+    Size = UDim2.new(0, math.max(LayoutState.CompactWidth, InitialSidebarWidth), 1, 0),
+    Parent = TopBar,
+})
+New("UIListLayout", {
+    FillDirection = Enum.FillDirection.Horizontal,
+    HorizontalAlignment = Enum.HorizontalAlignment.Center,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    Padding = UDim.new(0, 6),
+    Parent = TitleHolder,
+})
+LayoutRefs.TitleHolder = TitleHolder
+
+local WindowIcon
+if WindowInfo.Icon then
+    -- Get icon using Library:GetCustomIcon (supports Lucide + custom images)
+    local IconData = Library:GetCustomIcon(WindowInfo.Icon)
+    
+    if IconData then
+        WindowIcon = New("ImageLabel", {
+            Image = IconData.Url,
+            ImageColor3 = IconData.Custom and "White" or "AccentColor",
+            ImageRectOffset = IconData.ImageRectOffset,
+            ImageRectSize = IconData.ImageRectSize,
+            Size = WindowInfo.IconSize,
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, math.max(LayoutState.CompactWidth, InitialSidebarWidth), 1, 0),
-            Parent = TopBar,
-        })
-        New("UIListLayout", {
-            FillDirection = Enum.FillDirection.Horizontal,
-            HorizontalAlignment = Enum.HorizontalAlignment.Center,
-            VerticalAlignment = Enum.VerticalAlignment.Center,
-            Padding = UDim.new(0, 6),
             Parent = TitleHolder,
         })
-        LayoutRefs.TitleHolder = TitleHolder
-
-        local WindowIcon
-        if WindowInfo.Icon then
-            WindowIcon = New("ImageButton", {
-                Image = if tonumber(WindowInfo.Icon)
-                    then string.format("rbxassetid://%d", WindowInfo.Icon)
-                    else WindowInfo.Icon,
-                Size = WindowInfo.IconSize,
-                BackgroundTransparency = 1,
-                Parent = TitleHolder,
-            })
-        else
-            WindowIcon = New("TextButton", {
-                Text = WindowInfo.Title:sub(1, 1),
-                TextScaled = true,
-                Size = WindowInfo.IconSize,
-                BackgroundTransparency = 1,
-                Parent = TitleHolder,
-            })
-        end
-        WindowIcon.Visible = WindowInfo.Icon ~= nil or LayoutState.IsCompact
-        LayoutRefs.WindowIcon = WindowIcon
-
+    else
+        -- Fallback if icon not found
+        WindowIcon = New("TextButton", {
+            Text = WindowInfo.Title:sub(1, 1),
+            TextScaled = true,
+            Size = WindowInfo.IconSize,
+            BackgroundTransparency = 1,
+            Parent = TitleHolder,
+        })
+    end
+else
+    WindowIcon = New("TextButton", {
+        Text = WindowInfo.Title:sub(1, 1),
+        TextScaled = true,
+        Size = WindowInfo.IconSize,
+        BackgroundTransparency = 1,
+        Parent = TitleHolder,
+    })
+end
+WindowIcon.Visible = WindowInfo.Icon ~= nil or LayoutState.IsCompact
+LayoutRefs.WindowIcon = WindowIcon
+                        
         local WindowTitle = New("TextButton", {
             BackgroundTransparency = 1,
             Text = WindowInfo.Title,
